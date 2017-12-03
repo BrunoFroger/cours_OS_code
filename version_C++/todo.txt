@@ -1,0 +1,26 @@
+BUGS :
+
+
+
+
+TODO :
+
+- process console : lanceur de commandes 
+	- recupere pointeur sur memoire partagee
+	- creation de la table des commandes internes
+	
+	
+- gestionnaire de taches
+	- prevoir un pointeur sur la liste chainee des taches
+	- scheduler :
+		- 
+	- lanceur de tache
+	- prevoir fonction d'affichage en continu des taches
+	
+- gestionnaire memoire
+	- initialiser memoire partagee
+	- verifier que firstBlocMemoire est bien mis a jour dans memoire partagee
+	- prevoir fonction d'affichage en continu des blocs memoires
+	
+- programme de tests:
+	- ajouter un test sur nombre de blocs dans tests memoire, avec sortie KO 

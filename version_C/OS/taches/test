@@ -1,0 +1,7 @@
+#!/bin/osShell
+
+echo "test"
+$toto = 10
+$toto = $toto +2
+echo $toto
+exit 25

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "coucou"
+exit 10

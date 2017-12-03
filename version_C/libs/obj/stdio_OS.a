@@ -1,0 +1,22 @@
+!<arch>
+stdio_OS.c      1511113699  501   20    100644  106       `
+
+
+
+
+
+char getch(void){
+	char i;
+	i = 'e';
+
+	return i;
+}
+
+
+void putch(char car){
+	char tmp;
+
+	tmp=car;
+
+}
+

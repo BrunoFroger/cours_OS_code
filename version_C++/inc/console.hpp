@@ -21,8 +21,6 @@
 //-----------------------------
 class Console{
 private:
-	structMemPartagee *ptrMemPartagee;
-
 	void lireChaine(char *chaine, int size);
 	void analyseCommande(char *chaine);
 	void help(void);

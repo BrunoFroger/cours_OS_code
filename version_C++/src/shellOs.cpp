@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include <unistd.h>
 
 #include "../inc/console.hpp"
 
@@ -14,24 +15,19 @@ using namespace std;
 
 MemPartagee memPartagee;
 structMemPartagee *maStructMemPartagee;
-char nomMemoirePartagee[50];
 BlocMemoire *fisrtBlockMemoire;
 
 int main(int argc, const char * argv[]) {
     std::cout << "shell OS\n";
+    
+    maStructMemPartagee = (structMemPartagee *)malloc(sizeof(structMemPartagee));
 
-
-    maStructMemPartagee = (structMemPartagee *) malloc(sizeof(structMemPartagee));
-    strcpy(nomMemoirePartagee,"MemPartagéé : shell shellOs");
-
-    maStructMemPartagee = memPartagee.getMemPartagee();
+    memPartagee.getMemPartagee(maStructMemPartagee);
     std::cout << "memoire partagee initialisee\n";
-    memPartagee.affiche();
 
     fisrtBlockMemoire=memPartagee.getFirstBlocMemoire();
-    strcpy(nomMemoirePartagee,memPartagee.getNom());
 
-    Console::Console();
+    //Console::Console();
 
     return 0;
 }

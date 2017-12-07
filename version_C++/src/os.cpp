@@ -22,8 +22,12 @@ BlocMemoire *fisrtBlockMemoire;
 int main(int argc, const char * argv[]) {
     std::cout << "Simulateur d'OS\n";
 
-    maStructMemPartagee = (structMemPartagee *) malloc(sizeof(structMemPartagee));
-    strcpy(nomMemoirePartagee,"MemPartagéé : OS");
+    maStructMemPartagee = (structMemPartagee *)malloc(sizeof(structMemPartagee));
+    strcpy(nomMemoirePartagee,"MemPartagéé OS");
+    fisrtBlockMemoire = (BlocMemoire *)malloc(sizeof(BlocMemoire));
+    std::cout << "creation maStructMemPartagee : " << maStructMemPartagee << "\n";
+    std::cout << "creation fisrtBlockMemoire   : " << fisrtBlockMemoire << "\n";
+    std::cout << "creation nomMemoirePartagee  : " << nomMemoirePartagee << "\n";
 
     memPartagee.initMemPartagee(maStructMemPartagee, nomMemoirePartagee, fisrtBlockMemoire);
     std::cout << "memoire partagee initialisee\n";

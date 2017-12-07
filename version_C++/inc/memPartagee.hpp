@@ -27,13 +27,11 @@ class MemPartagee{
 private:
 	int memId;
 	structMemPartagee *ptrMemPartagee;
-	char *nomMemPartagee;
-	BlocMemoire *firstBlocMemoire; 
 	void affErrno();
 public:
 	MemPartagee(void);
 	void initMemPartagee(structMemPartagee *maStructMemPartagee, char * nom, BlocMemoire *fisrtBlocMemoire);
-	structMemPartagee *getMemPartagee(void);
+	void getMemPartagee(structMemPartagee *maStructMemPartagee);
 	void setFirstBlocMemoire(BlocMemoire *bloc);
 	BlocMemoire *getFirstBlocMemoire(void);
 	void setNom(char *nom);

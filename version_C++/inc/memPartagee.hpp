@@ -31,7 +31,7 @@ private:
 public:
 	MemPartagee(void);
 	void initMemPartagee(structMemPartagee *maStructMemPartagee, char * nom, BlocMemoire *fisrtBlocMemoire);
-	void getMemPartagee(structMemPartagee *maStructMemPartagee);
+	void getMemPartagee();
 	void setFirstBlocMemoire(BlocMemoire *bloc);
 	BlocMemoire *getFirstBlocMemoire(void);
 	void setNom(char *nom);

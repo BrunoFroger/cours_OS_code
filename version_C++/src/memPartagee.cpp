@@ -19,6 +19,17 @@ int memId;
 extern BlocMemoire *firstBlocMemoire;
 extern structMemPartagee *maStructMemPartagee;
 
+
+
+void afficheMemPartagee(structMemPartagee *ptr){
+	std::cout << "\nContenu de la structure MemPartagée\n";
+	std::cout << "ptrMemPartagee       : " << ptr << "\n";
+	std::cout << "    nomMemPartagee   : " << ptr->nomMemPartagee << "\n";
+	std::cout << "    firstBlocMemoire : " << ptr->firstBlocMemoire << "\n";
+	std::cout << "\n";
+}
+
+
 MemPartagee::MemPartagee(void){
 	std::cout << "\nMemPartagee : constructeur\n";
 }
@@ -69,16 +80,18 @@ void MemPartagee::initMemPartagee(structMemPartagee *maStructMemPartagee, char *
 	}else{
 		std::cout << "MemPartagee : initMemPartagee : shmat ok : ptr recupere = " << ptr << "\n";
 	}
-	//memcpy(ptr,maStructMemPartagee,sizeof(structMemPartagee));
-	ptr->firstBlocMemoire=getFirstBlocMemoire();
-	strcpy(ptr->nomMemPartagee,getNom());
+	ptr->firstBlocMemoire=firstBlocMemoire;
+	strcpy(ptr->nomMemPartagee,nom);
 
+	afficheMemPartagee(ptr);
+
+	ptrMemPartagee=ptr;
 	std::cout << "MemPartagee : initMemPartagee : ptrMemPartagee : " << ptrMemPartagee << "\n";
 	//affiche();
 }
 
 
-void MemPartagee::getMemPartagee(structMemPartagee *maStructMemPartagee){	
+void MemPartagee::getMemPartagee(void){	
 	std::cout << "\nMemPartagee : getMemPartagee\n";
 	structMemPartagee *ptr;
 
@@ -101,10 +114,12 @@ void MemPartagee::getMemPartagee(structMemPartagee *maStructMemPartagee){
 		affErrno();
 		exit(-1);
 	}else{
-		std::cout << "MemPartagee : getMemPartagee : shmat ok : ptrMemPartagee = " << ptr << "\n";
+		std::cout << "MemPartagee : getMemPartagee : shmat ok : ptr = " << ptr << "\n";
 	}
-	memcpy(maStructMemPartagee,ptr,sizeof(structMemPartagee));
-	std::cout << "MemPartagee : getMemPartagee : maStructMemPartagee = " << maStructMemPartagee << "\n";
+	afficheMemPartagee(ptr);
+
+	ptrMemPartagee=ptr;
+	std::cout << "MemPartagee : getMemPartagee : ptrMemPartagee : " << ptrMemPartagee << "\n";
 	//affiche();
 }
 
@@ -152,4 +167,5 @@ void MemPartagee::affiche(void){
 	std::cout << "    firstBlocMemoire : " << getFirstBlocMemoire() << "\n";
 	std::cout << "\n";
 }
+
 

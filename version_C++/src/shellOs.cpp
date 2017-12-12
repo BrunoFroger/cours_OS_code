@@ -14,20 +14,19 @@
 using namespace std;
 
 MemPartagee memPartagee;
-structMemPartagee *maStructMemPartagee;
-BlocMemoire *fisrtBlockMemoire;
+//structMemPartagee *maStructMemPartagee;
+BlocMemoire *firstBlocMemoire;
 
 int main(int argc, const char * argv[]) {
     std::cout << "shell OS\n";
-    
-    maStructMemPartagee = (structMemPartagee *)malloc(sizeof(structMemPartagee));
 
-    memPartagee.getMemPartagee(maStructMemPartagee);
+    memPartagee.getMemPartagee();
     std::cout << "memoire partagee initialisee\n";
 
-    fisrtBlockMemoire=memPartagee.getFirstBlocMemoire();
+    //memPartagee.getFirstBlocMemoire();
+    //memPartagee.affiche();
 
-    //Console::Console();
+    Console::Console();
 
     return 0;
 }

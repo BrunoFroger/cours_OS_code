@@ -1,14 +1,14 @@
 #!/bin/bash
 
 
-echo "lancement du projet OS"
+clear
+make
 
-export SRC="src/BlocMemoire.cpp src/console.cpp src/Memoire.cpp src/memPartagee.cpp"
-export INC="inc/os.hpp inc/console.hpp inc/Memoire.hpp inc/memPartagee.hpp"
-export MAINS="src/shellOs.cpp src/test.cpp src/os.cpp "
-export TOOLS="build.bash lanceProjet.bash todo.txt makefile"
+export ret=$?
 
-subl -n $TOOLS
-subl -n $SRC
-subl -n $INC
-subl -n $MAINS
+#echo "retour = " $ret
+if [ $ret -eq 0 ]; then
+	bin/$1
+else
+	echo "erreurs de compilation"
+fi

@@ -15,8 +15,8 @@
 
 using namespace std;
 
-BlocMemoire *firstBlocMemoire=NULL;
 extern MemPartagee memPartagee;
+extern BlocMemoire *firstBlocMemoire;			// point d'entree des blocs meomire
 
 //--------------------------------
 //

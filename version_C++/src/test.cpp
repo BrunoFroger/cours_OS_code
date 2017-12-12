@@ -16,7 +16,8 @@
 using namespace std;
 
 MemPartagee memPartagee;
-structMemPartagee maStructMemPartagee;
+structMemPartagee *maStructMemPartagee;
+BlocMemoire *firstBlocMemoire;
 
 int main(int argc, const char * argv[]) {
     std::cout << "tests Simulateur d'OS\n";

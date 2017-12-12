@@ -24,7 +24,7 @@ char params[PARAM_NB][PARAM_SIZE];
 //char []lstCommandeInterne[]={"tsk", "kill", "mem", "dumpMem", "fillMem", "hist", "shell", "garbage", "?", "exit"};
 char lstCommandeInterne[10][10]={"help", "exit", "mem"};
 
-BlocMemoire *shellFirstBlocMemoire;
+extern BlocMemoire *firstBlocMemoire;
 extern MemPartagee memPartagee;
 
 //--------------------------------
@@ -36,14 +36,14 @@ Console::Console(){
 	char saisie[BUFF_SIZE];
     std::cout << "Console\n";
 
-	shellFirstBlocMemoire = memPartagee.getFirstBlocMemoire();
-	//std::cout << "nom de la memoire partagee : " << refMemPartagee.getNom() << "\n";
-	if (shellFirstBlocMemoire == NULL){
+	firstBlocMemoire = memPartagee.getFirstBlocMemoire();
+	std::cout << "Console : firstBlocMemoire : " << firstBlocMemoire << "\n";
+	if (firstBlocMemoire == NULL){
 		std::cout << "ERROR : unable to access to list of memory blocs \n";
 		return;
 	}
 	std::cout << "Console : aff data partagee\n";
-	shellFirstBlocMemoire->affBlocs();
+	//firstBlocMemoire->affBlocDetail();
 	std::cout << "Console \n";
 	while (1){
 		std::cout << prompt;
@@ -104,6 +104,7 @@ void Console::help(void){
 	//printf("| shell             | lance un shell dans une nouvelle fenetre   |\n");
 	//printf("| garbage           | nettoyage de la memoire                    |\n");
 	printf("| help              | cette ecran d'aide                         |\n");
+	printf("| ?                 | cette ecran d'aide                         |\n");
 	printf("| exit              | quitte la console                          |\n");
 	printf("+-------------------+--------------------------------------------+\n");
 }
@@ -120,9 +121,11 @@ void Console::analyseCommande(char *chaine){
 		exit(0);
 	} else if (strcmp(chaine,"help") == 0){
 		help();
+	} else if (strcmp(chaine,"?") == 0){
+		help();
 	} else if (strcmp(chaine, "mem") == 0){
 		do{ 
-			shellFirstBlocMemoire->affBlocs();
+			firstBlocMemoire->affBlocs();
 			std::cout << "Press enter to refresh (or q to quit)\n";
 		} while (std::cin.get() != 'q');
 	}

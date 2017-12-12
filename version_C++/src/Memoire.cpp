@@ -21,58 +21,58 @@ char nomTasMemoire[15];
 
 extern MemPartagee memPartagee;
 extern structMemPartagee maStructMemPartagee;
+extern BlocMemoire *firstBlocMemoire;			// point d'entree des blocs meomire
 
 //--------------------------------
 //
 //     Constructeur
 //
 //--------------------------------
+
 Memoire::Memoire(){
+    std::cout << "\n\nMemoire : constructeur\n";
     Memoire(MEMORY_SIZE);
 }
-    
+
 Memoire::Memoire(long taille){
-    //std::cout << "\n\nMemoire : constructeur : taille = " << taille << "\n";
+    std::cout << "\n\nMemoire : constructeur : taille = " << taille << "\n";
     long i;
     for (i = 0 ; i < taille ; i++){
         memoryArea[i]=0;
     }
     // on initialise toute la zone memoire a libre en tant qu'un seul bloc
     sprintf(nomTasMemoire, "unused memory %d", cptUnusedMemory);
-    //std::cout << "Memoire : creation du tas : " << nomTasMemoire << "\n";
+    std::cout << "Memoire : creation du tas : " << nomTasMemoire << "\n";
     
     BlocMemoire *tmp, *newBloc, *precedent;
     precedent=NULL;
-    tmp = firstBlocMemoire;
-    // on verifie s'il y a d'autres blocs de memoire crées
-    if (tmp != NULL){
-        //std::cout << "Memoire : au moins 1 bloc existe\n";
+    if (firstBlocMemoire->getSize() == 0){
+    	// le premier bloc n'a pas encore ete initialisé, on l'initialsise
+	    firstBlocMemoire->init(memoryArea, cptUnusedMemory, nomTasMemoire, 0, taille);
+		std::cout << "Memoire : initialisation du firstBlocMemoire : " << firstBlocMemoire << "\n";
+
+    }else{
+	    tmp = firstBlocMemoire;
+        std::cout << "Memoire : au moins 1 bloc existe\n";
         do{
             precedent=tmp;
             if (tmp->getNextBloc() != NULL){
-                //std::cout << "Memoire : il y a des sous bloc, on passe au suivant \n";
+                std::cout << "Memoire : il y a des sous bloc, on passe au suivant \n";
                 tmp=tmp->getNextBloc();
             }
         } while (tmp->getNextBloc() != NULL);
 
-    }
-    //std::cout << "creation d'un nouveau bloc\n";
-    newBloc = (BlocMemoire *) malloc(sizeof(BlocMemoire));
-    //std::cout << "Memoire : initialisation du nouveau bloc : " << newBloc << "\n";
-    newBloc->init(memoryArea, cptUnusedMemory, nomTasMemoire, 0, taille);
-    if (precedent != NULL){
-        //std::cout << "Memoire : il y a un bloc precedent, creation du lien \n";
-        tmp->link(newBloc);
-    }else{
-        firstBlocMemoire=newBloc;
-        //std::cout << "Memoire : c'est le premier bloc, on init fistBlocMemoire : " << firstBlocMemoire << "\n";
-        //memPartagee.setFirstBlocMemoire(firstBlocMemoire);
-        //std::cout << "Memoire : c'est le premier bloc, init fistBlocMemoire fait : " << memPartagee.getFirstBlocMemoire() << "\n";
-    }
-    //firstBlocMemoire->affBlocDetail();
+	    if (precedent != NULL){
+		    std::cout << "creation d'un nouveau bloc\n";
+		    newBloc = (BlocMemoire *) malloc(sizeof(BlocMemoire));
+		    std::cout << "Memoire : initialisation du nouveau bloc : " << newBloc << "\n";
+		    newBloc->init(memoryArea, cptUnusedMemory, nomTasMemoire, 0, taille);
+	        std::cout << "Memoire : il y a un bloc precedent, creation du lien \n";
+	        tmp->link(newBloc);
+	    }
+	}
     cptUnusedMemory++;
-    memPartagee.setFirstBlocMemoire(firstBlocMemoire);
-    //std::cout << "Memoire : fin constructeur\n\n";
+    std::cout << "Memoire : fin constructeur\n\n";
 }
 
 //--------------------------------

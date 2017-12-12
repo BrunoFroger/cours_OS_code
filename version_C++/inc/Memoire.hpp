@@ -71,6 +71,5 @@ public:
 };
 
 
-extern BlocMemoire *firstBlocMemoire;			// point d'entree des blocs meomire
 
 #endif /* memoire_hpp */

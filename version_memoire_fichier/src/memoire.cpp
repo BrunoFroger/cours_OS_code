@@ -9,8 +9,10 @@
 
 #include <iostream>
 #include <cstdio>
+#include <cstring>
 
 #include "../inc/memoire.hpp"
+#include "../inc/os.hpp"
 
 char nom[50];
 
@@ -21,16 +23,25 @@ char nom[50];
 //--------------------------------
 Memoire::Memoire(){
     //std::cout << "\nMemoire : constructeur\n";
-    strcpy(nom,"defaultMemory.dta");
-    Memoire(nom);
 }
 
-Memoire::Memoire(char *nomFichier){
-    std::cout << "\nMemoire : constructeur fichier memoire avec nom : " << nomFichier << "\n";
+//--------------------------------
+//
+//     init
+//
+//--------------------------------
+void Memoire::init(char *nomFichier){
+    //std::cout << "\nMemoire : initialisation fichier memoire avec nom : " << nomFichier << "\n";
     strcpy(filename,nomFichier);
-    memoryFile = fopen(filename,"wb+");
+    memoryFile = fopen(filename,"rb+");
     if (memoryFile == NULL){
-    	std::cerr << "ERROR : unable to open Memory File (NULL) : " << filename  << "\n";
+    	//std::cout << "Memoire::init : ouverture en wb+ de " <<filename << "\n";
+	    memoryFile = fopen(filename,"wb+");
+	}else{
+		//std::cout << "Memoire::init : ouverture en rb+ de " <<filename << "\n";
+	}
+    if (memoryFile == NULL){
+    	std::cout << "ERROR : unable to open Memory File (NULL) : " << filename  << "\n";
     }
     tailleStructBloc = sizeof(structBloc);
    	//std::cerr << "Memoire : taille des blocs memoire : " << tailleStructBloc  << "\n";
@@ -57,28 +68,25 @@ long Memoire::memWrite(long offset, char *datas){
 //
 //--------------------------------
 char * Memoire::memRead(long offset, long nb){
-	//std::cout << "memRead : essai de lecture de : " << nb << " caracteres a partir de " << offset << "\n";
+	std::cout << "memRead : essai de lecture de : " << nb << " caracteres a partir de " << offset << "\n";
 	if (nb >= MAX_BUFFER){
 		std::cout << "ERROR : data size to read in memory is too big (" << nb << "\n";
-		return -1;
+		return NULL;
 	}
 	fseek(memoryFile, offset, 0);
 	fflush(memoryFile);
 	long tmp ;
 	tmp = fread(buffer, 1, (size_t) nb, memoryFile);
-	//std::cout << "memRead : nombre de caracteres lus : " << tmp << " [" << &buffer << "]\n";
+	std::cout << "memRead : nombre de caracteres lus : " << tmp << " [" << &buffer << "]\n";
 	return buffer;
 }
 
 //--------------------------------
 //
-//     display
+//     dump
 //
 //--------------------------------
-void Memoire::display(long offset, long nb){
-	//std::cout << "display : essai de display de : " << nb << " caracteres a partir de " << offset << "\n";
-	memRead(offset,nb);
-	// le resultat de memRead est dans la variable priveee buffer
+void Memoire::dump(long offset, long nb){
 	int nbItemParLigne = 16;
 	int idItem=0;
 	char asciiItems[25];
@@ -86,7 +94,7 @@ void Memoire::display(long offset, long nb){
 
 	//std::cout << "display : display " << nb << " caracteres a partir de : " << offset << "\n";
 	long i = 0;
-	printf("%4ld :",i);
+	printf("%4ld :",offset + i);
 	for (i = 0 ; i <= nb ; i++){
 		if (idItem >= nbItemParLigne){
 			// affichage des caracteres en representation ascii
@@ -98,7 +106,7 @@ void Memoire::display(long offset, long nb){
 					printf(".");
 				}
 			}
-			printf("\n%4ld :",i);
+			printf("\n%4ld :",offset + i);
 			idItem = 0;
 		}
 		car=buffer[i]; 
@@ -111,10 +119,29 @@ void Memoire::display(long offset, long nb){
 
 //--------------------------------
 //
+//     display
+//
+//--------------------------------
+void Memoire::display(long offset, long nb){
+	std::cout << "display : essai de display de : " << nb << " caracteres a partir de " << offset << "\n";
+	memRead(offset,nb);
+	// le resultat de memRead est dans la variable priveee buffer
+	dump(offset, nb);
+}
+
+
+//--------------------------------
+//
 //     alloueBloc
 //
 //--------------------------------
-int Memoire::alloueBloc(long taille){
+int Memoire::alloueBloc(long taille,char *blocType){
+	// initialiser le nom du bloc pour l'autre methode
+	return alloueBloc(taille, blocType, NULL);
+}
+
+int Memoire::alloueBloc(long taille,char *blocType, char *blocName){
+	//std::cout << "Memoire::alloueBloc : allocation d'un bloc de " << taille << "\n";
 	int id=0;
 	structBloc tmpBloc;
 	long offset=0;
@@ -135,11 +162,17 @@ int Memoire::alloueBloc(long taille){
 	strcpy(tmpBloc.fin,"[fin]");
 	tmpBloc.id=id;
 	tmpBloc.size=taille;
+	strcpy(tmpBloc.type,blocType);
 	strcpy(tmpBloc.status,BLOC_USED);
-	sprintf(tmpBloc.name,"bloc %d",id);
-	tmpBloc.datas = malloc(tailleStructBloc);
+	if (blocName == NULL){
+		sprintf(tmpBloc.name,"bloc %d",id);
+	}else{
+		strcpy(tmpBloc.name,blocName);
+	}
+	tmpBloc.datas = (char *)malloc(taille);
 	fwrite(&tmpBloc,(size_t)tailleStructBloc,1,memoryFile);
 	//afficheBloc(tmpBloc);
+	fflush(memoryFile);
 	return id;
 }
 
@@ -160,6 +193,21 @@ structBloc Memoire::getBloc(int id){
 	tmpBloc.size=0;
 	return tmpBloc;
 }
+structBloc Memoire::getBloc(char *chaine){
+	structBloc tmpBloc;
+	long offset=0;
+	fseek(memoryFile,offset,0);
+	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	while (tmp == tailleStructBloc){
+		if (strcmp(tmpBloc.name,chaine) == 0){
+			return tmpBloc;
+		}
+		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	}
+	tmpBloc.id=-1;
+	tmpBloc.size=0;
+	return tmpBloc;
+}
 
 
 //--------------------------------
@@ -173,10 +221,12 @@ void Memoire::afficheBloc(structBloc bloc){
 		std::cout << "ERROR bloc id " << bloc.id << " is invalid\n";
 		return;
 	}
+	std::cout << "type      : " << bloc.type << "\n";
 	std::cout << "id        : " << bloc.id << "\n";
 	std::cout << "nom       : " << bloc.name << "\n";
 	std::cout << "taille    : " << bloc.size << "\n";
-	std::cout << "ptr datas : " << bloc.datas << "\n";
+	std::cout << "status    : " << bloc.status << "\n";
+	std::cout << "ptr datas : " << &bloc.datas << "\n";
 	std::cout << "\n";
 }
 
@@ -193,14 +243,21 @@ void Memoire::listeBlocs(void){
 	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	//std::cout << "listeBlocs : nombre de caracteres lus : " << tmp <<  " " << tailleStructBloc << "\n";
 	// affichage de l'entete
-	std::cout << "+-----+--------+--------+----------------+---------------------------+\n";
-	std::cout << "|  id | taille | status | Ptr datas      |  nom du bloc              |\n";
-	std::cout << "+-----+--------+--------+----------------+---------------------------+\n";
+	if (tmp != tailleStructBloc){
+		std::cout << "ERROR : impossible to read memory bloc list (" << tmp << ")\n";
+		return;
+	}
+	//std::cout << " first data bloc : " << tmpBloc.datas << "\n";
+	std::cout << "+-----+------+--------+--------+----------------+---------------------------+\n";
+	std::cout << "|  id | type | taille | status | Ptr datas      |  nom du bloc              |\n";
+	std::cout << "+-----+------+--------+--------+----------------+---------------------------+\n";
 	while (tmp == tailleStructBloc){
 		//std::cout << "offset = " << offset << "; affichage du bloc n°" << tmpBloc.id << "\n";
-		sprintf(ligne,"| %3d | %6ld | %5s  |",tmpBloc.id, tmpBloc.size,tmpBloc.status);
+		sprintf(ligne,"| %3d |  %3s | %6ld | %5s  |",tmpBloc.id, tmpBloc.type, tmpBloc.size,tmpBloc.status);
 		std::cout << ligne;
-		std::cout << " " << tmpBloc.datas << " |";
+		sprintf(ligne, " %14p |",tmpBloc.datas);
+		std::cout << ligne;
+		//std::cout << " " << tmpBloc.datas << " |";
 		sprintf(ligne," %-25s |",tmpBloc.name);
 		std::cout << ligne;
 		std::cout << "\n";
@@ -209,6 +266,146 @@ void Memoire::listeBlocs(void){
 		fseek(memoryFile,offset,0);
 		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	}
-	std::cout << "+-----+--------+--------+----------------+---------------------------+\n";
+	std::cout << "+-----+------+--------+--------+----------------+---------------------------+\n";
 }
 
+
+//--------------------------------
+//
+//     nbBlocs
+//
+//--------------------------------
+int Memoire::nbBlocs(void){
+	int cpt=0;
+	long offset=0;
+	structBloc tmpBloc;
+	fseek(memoryFile,offset,0);
+	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	//std::cout << "listeBlocs : nombre de caracteres lus : " << tmp <<  " " << tailleStructBloc << "\n";
+	// affichage de l'entete
+	if (tmp != tailleStructBloc){
+		std::cout << "ERROR : impossible to read memory bloc list (" << tmp << ")\n";
+		return 0;
+	}
+	while (tmp == tailleStructBloc){
+		cpt++;
+		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	}
+	return cpt;
+}
+
+//--------------------------------
+//
+//     libereBloc
+//
+//--------------------------------
+void Memoire::libereBloc(int id){
+
+	long offset=0;
+	structBloc tmpBloc;
+
+	//std::cout << "Memoire::libereBloc : " << id << "\n";
+
+	fseek(memoryFile,offset,0);
+	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	//std::cout << "listeBlocs : nombre de caracteres lus : " << tmp <<  " " << tailleStructBloc << "\n";
+	// affichage de l'entete
+	if (tmp != tailleStructBloc){
+		std::cout << "ERROR : impossible to read memory bloc list (" << tmp << ")\n";
+		return;
+	}
+	while (tmp == tailleStructBloc){
+		if (tmpBloc.id == id){
+			//std::cout << "Memoire::libere => on a trouve l'id du bloc " << id << "\n";
+			strcpy(tmpBloc.status,BLOC_FREE);
+			tmpBloc.size=-1;
+			free (tmpBloc.datas);
+			tmpBloc.datas=NULL;
+			strcpy(tmpBloc.name,"");
+			strcpy(tmpBloc.type,BLOC_TYPE_NA);
+			//afficheBloc(tmpBloc);
+			// on ecrit ce bloc sur le fichier
+			long position =ftell(memoryFile);
+			position -= tailleStructBloc;
+			fseek(memoryFile,position,0);
+			fwrite(&tmpBloc,(size_t)tailleStructBloc,1,memoryFile);
+			return;
+		}
+		tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	}
+	// on sort de la boucle sans avoir trouve le bloc concerne
+	std::cout << "ERROR : bloc " << id << " inconnu\n";
+}
+
+//--------------------------------
+//
+//     kill
+//
+//--------------------------------
+void Memoire::kill(void){
+	char commande[25];
+	sprintf(commande,"rm %s",filename);
+	std::cout << "Memoire::kill : destruction du fichier memoire avec la commande : " << commande << "\n";
+	system(commande);
+}
+
+//--------------------------------
+//
+//     blocWrite
+//
+//--------------------------------
+long Memoire::blocWrite(int id, long offset, char *datas){
+	//std::cout << "Memoire::blocWrite : Debut (en cours  ecriture)\n";
+	//std::cout << "Memoire::blocWrite : id(" << id << ") ; offset(" << offset << ")\n";
+	//std::cout << "Memoire::blocWrite : tentative d'ecriture de datas :\n";
+	//std::cout << "-------------------------------------------\n";
+	//std::cout << datas << "\n";
+	//std::cout << "-------------------------------------------\n";
+	char *ptr = getPtrData(id);
+	//std::cout << "Memoire::blocWrite : ptr(" << &ptr << ")\n";
+	ptr += offset;
+	//std::cout << "Memoire::blocWrite : ecriture dans la memoire ; taille = " << strlen(datas) << "\n";
+	strcpy(ptr,datas);
+	//std::cout << "Memoire::blocWrite : fin\n";
+	return strlen(datas);
+}
+
+//--------------------------------
+//
+//     blocRead
+//
+//--------------------------------
+char *Memoire::blocRead(int id, long offset, long nb){
+	//std::cout << "Memoire::blocRead : Debut (en cours  ecriture)\n";
+	//std::cout << "Memoire::blocRead : id(" << id << ") ; offset(" << offset << ") ; nb(" << nb << ")\n";
+	char *ptr;
+	ptr = getPtrData(id);
+	if (ptr == NULL){
+		std::cout << "ERROR : impossible to get pointer on data structure\n";
+		return NULL;
+	}
+	//std::cout << "Memoire::blocRead : ptr(" << &ptr << ")\n";
+	ptr += offset;
+	//std::cout << "Memoire::blocRead : lecture dans la memoire ; taille = " << nb << "\n";
+	memcpy(buffer,ptr, (size_t)nb);
+	//dump(offset, nb);
+	//std::cout << "Memoire::blocRead : fin\n";
+	return buffer;
+}
+
+//--------------------------------
+//
+//     getPtrData
+//
+//--------------------------------
+char *Memoire::getPtrData(int id){
+	char *ptr;
+	// retourne le pointeur sur la zone de data allouee a cet id
+	structBloc tmpBloc;
+	tmpBloc=getBloc(id);
+	//std::cout << "Memoire::getPtrData : " << tmpBloc.datas << "\n";
+	//afficheBloc(tmpBloc);
+	ptr = tmpBloc.datas;
+	//std::cout << "Memoire::getPtrData : " << ptr << "\n";
+	return ptr;
+}

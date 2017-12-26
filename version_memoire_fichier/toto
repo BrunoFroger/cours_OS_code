@@ -1,0 +1,10 @@
+#ceci est un programme de test
+
+
+// programme principal
+main(){
+	
+	// appel d'une fonction
+	resultat = call maFonction(10,"texte");
+	affiche resultat;
+}

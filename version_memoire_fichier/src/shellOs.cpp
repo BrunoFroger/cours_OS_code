@@ -9,18 +9,26 @@
 #include <iostream>
 
 #include "../inc/Memoire.hpp"
+#include "../inc/Console.hpp"
+#include "../inc/os.hpp"
+#include "../inc/taches.hpp"
 
 
 using namespace std;
+
+Memoire maMemoire;
+Taches mesTaches;
 
 int main(int argc, const char * argv[]) {
     std::cout << "Simulateur d'OS : shell externe\n";
     
     char filename[50];
 
-    strcpy(filename, "memoire1.dta");
+    strcpy(filename, MEMORY_FILENAME);
     cout << "creation memoire 0\n";
-    Memoire maMemoire(filename);
+    maMemoire.init(filename);
+	mesTaches.init(filename);
 
+    Console::Console();
     return 0;
 }

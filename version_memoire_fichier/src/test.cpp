@@ -9,9 +9,14 @@
 #include <iostream>
 
 #include "../inc/Memoire.hpp"
+#include "../inc/os.hpp"
+#include "../inc/taches.hpp"
 
 
 using namespace std;
+
+Memoire maMemoire;
+Taches mesTaches;
 
 int main(int argc, const char * argv[]) {
     std::cout << "Simulateur d'OS : programme de tests\n";
@@ -20,9 +25,10 @@ int main(int argc, const char * argv[]) {
     long taille;
 	    int id;
 
-    strcpy(filename, "memoire1.dta");
+    strcpy(filename, MEMORY_FILENAME);
     cout << "test : creation memoire 0\n";
-    Memoire maMemoire(filename);
+    maMemoire.init(filename);
+	mesTaches.init(filename);
 
     if ( 1 == 0 ) {
 	    char data[100];
@@ -37,21 +43,21 @@ int main(int argc, const char * argv[]) {
     if ( 1 == 1 ){
 	    taille=100;
 	    cout << "test : allocation d'un bloc de taille : " << taille << "\n";
-	    id = maMemoire.alloueBloc(taille);
+	    id = maMemoire.alloueBloc(taille, BLOC_TYPE_MEM);
 	    cout << "test : bloc avec id = " << id << " alloue\n";
 
     }
     if ( 1 == 1 ){
 	    taille=50;
 	    cout << "test : allocation d'un bloc de taille : " << taille << "\n";
-	    id = maMemoire.alloueBloc(taille);
+	    id = maMemoire.alloueBloc(taille, BLOC_TYPE_MEM);
 	    cout << "test : bloc avec id = " << id << " alloue\n";
 
     }
     if ( 1 == 1 ){
 	    taille=200;
 	    cout << "test : allocation d'un bloc de taille : " << taille << "\n";
-	    id = maMemoire.alloueBloc(taille);
+	    id = maMemoire.alloueBloc(taille, BLOC_TYPE_MEM);
 	    cout << "test : bloc avec id = " << id << " alloue\n";
 
     }

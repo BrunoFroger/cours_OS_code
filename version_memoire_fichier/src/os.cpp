@@ -12,6 +12,7 @@
 #include "../inc/Console.hpp"
 #include "../inc/os.hpp"
 #include "../inc/taches.hpp"
+#include "../inc/tools.hpp"
 
 
 using namespace std;
@@ -20,12 +21,14 @@ Memoire maMemoire;
 Taches mesTaches;
 
 int main(int argc, const char * argv[]) {
-    std::cout << "Simulateur d'OS : moteur principal\n";
+    INFO("==================================");
+    INFO("Simulateur d'OS : moteur principal");
+    INFO("----------------------------------");
     
     char filename[50];
 
     strcpy(filename, MEMORY_FILENAME);
-    //cout << "creation memoire 0\n";
+    INFO("creation memoire 0");
 	//maMemoire.init(filename);
 	maMemoire.init(filename);
 	mesTaches.init(filename);
@@ -35,5 +38,8 @@ int main(int argc, const char * argv[]) {
 
     maMemoire.kill();
 
+    INFO("----------------------------------");
+    INFO("Simulateur d'OS : fin d'execution ");
+    INFO("==================================");
     return 0;
 }

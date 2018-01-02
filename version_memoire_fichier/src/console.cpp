@@ -10,6 +10,8 @@
 #include <sys/select.h>
 #include <stdio.h>
 #include <cstring>
+#include <unistd.h>
+#include <time.h>
 
 #include "../inc/console.hpp"
 #include "../inc/os.hpp"
@@ -37,17 +39,18 @@ char lstCommandeInterne[50][10]={"mem", "affBloc", "allocMem", "dump", "blocRead
 //--------------------------------
 Console::Console(){
 	char saisie[BUFF_SIZE];
-	char car;
+	//char car;
 	//std::cout << "Console::Console => constructeur \n";
 	while (1){
 
+/*
 		if (kbhit()){
 			// un caractere a ete saisi
 			car = getchar();
 			std::cout << car;
 		}
-
-		/*
+*/
+		
 		std::cout << prompt;
 		lireChaine(saisie,BUFF_SIZE);
 		switch(analyseCommande(saisie)){
@@ -56,7 +59,7 @@ Console::Console(){
 				break;
 			default : // normal commande execution
 				break;
-		}*/
+		}
 	}
 }
 
@@ -67,8 +70,68 @@ Console::Console(){
 //
 //-----------------------------
 void Console::lireChaine(char *chaine, int size){
+	//std::cout << "debut de lire chaine\n";
+	/*
 	fgets(chaine, size, stdin);
 	chaine[strlen(chaine) - 1] = '\0';
+	*/
+
+	// test de la fonction kbhit
+	std::cout << std::flush;
+	strcpy(chaine,"");
+	char car, car1;
+	int idx=0;
+	while (1){
+		if (kbhit()){
+			car = getchar();
+			std::cout << std::flush;
+			printf("code de touche saisie %d(0x%02x) \n",car,car);
+			switch (car){
+				case 0x0a: 
+					// validation de la commande par return
+					std::cout << "validation de la commande " << chaine;
+					std::cout << "\n";
+					return;
+					break;;
+				case 0x27:
+					// saisie d'un caractere special (esc + ...)
+					printf("touche speciale saisie (esc)\n");
+					car1 = getchar();
+					if (car1 == 0x5b){
+						car1 = getchar();
+						// on traite la gestion des fleches
+						switch(car1){
+							case 65: 
+								// fleche vers le haut
+								printf("touche speciale (esc) fleche haut \n");
+								break;
+							case 64: 
+								// fleche vers le bas
+								printf("touche speciale (esc) fleche bas \n");
+								break;
+							default:
+								printf("code de touche inconnu %d(0x%02x) \n",car1,car1);
+						}
+
+					}
+					break;;
+				default:
+					// autre caractere, on l'ajoute a la chaine
+					//std::cout << car;
+					chaine[idx++]=car;
+					chaine[idx]='\0';
+					break;
+			}
+		}
+		int milliseconds=10;
+	    struct timespec ts;
+	    ts.tv_sec = milliseconds / 1000;
+	    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+	    nanosleep(&ts, NULL);
+		//usleep(1);
+		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+	std::cout << std::flush;
 }
 
 //-----------------------------

@@ -17,6 +17,7 @@ using namespace std;
 
 Memoire maMemoire;
 Taches mesTaches;
+int userId;
 
 int main(int argc, const char * argv[]) {
     std::cout << "Simulateur d'OS : programme de tests\n";
@@ -28,6 +29,7 @@ int main(int argc, const char * argv[]) {
     strcpy(filename, MEMORY_FILENAME);
     cout << "test : creation memoire 0\n";
     maMemoire.init(filename);
+	userId=maMemoire.newUserId();
 	mesTaches.init(filename);
 
     if ( 1 == 0 ) {

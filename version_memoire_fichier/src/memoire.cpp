@@ -13,7 +13,10 @@
 
 #include "../inc/memoire.hpp"
 #include "../inc/os.hpp"
+#include "../inc/users.hpp"
+#include "../inc/tools.hpp"
 
+extern Users monUser;
 char nom[50];
 
 //--------------------------------
@@ -31,8 +34,17 @@ Memoire::Memoire(){
 //
 //--------------------------------
 void Memoire::init(char *nomFichier){
-    //std::cout << "\nMemoire : initialisation fichier memoire avec nom : " << nomFichier << "\n";
     strcpy(filename,nomFichier);
+	openMemoryFile();
+}
+
+//--------------------------------
+//
+//     openMemoryFile
+//
+//--------------------------------
+void Memoire::openMemoryFile(void){
+    //std::cout << "\nMemoire : initialisation fichier memoire avec nom : " << filename << "\n";
     memoryFile = fopen(filename,"rb+");
     if (memoryFile == NULL){
     	//std::cout << "Memoire::init : ouverture en wb+ de " <<filename << "\n";
@@ -45,6 +57,7 @@ void Memoire::init(char *nomFichier){
     }
     tailleStructBloc = sizeof(structBloc);
    	//std::cerr << "Memoire : taille des blocs memoire : " << tailleStructBloc  << "\n";
+    //std::cout << "\nMemoire : fin initialisation fichier memoire avec nom : " << nomFichier << "\n";
 }
 
 //--------------------------------
@@ -53,12 +66,14 @@ void Memoire::init(char *nomFichier){
 //
 //--------------------------------
 long Memoire::memWrite(long offset, char *datas){
+	openMemoryFile();
 	fseek(memoryFile, offset, 0);
 	fflush(memoryFile);
 	long nb = strlen(datas);
 	nb = fwrite (datas, 1, nb, memoryFile);
 	//std::cout << "memWrite : nombre de caracteres ecris : " << nb << "\n";
 	fflush(memoryFile);
+	fclose(memoryFile);
 	return nb;
 }
 
@@ -137,14 +152,35 @@ void Memoire::display(long offset, long nb){
 //--------------------------------
 int Memoire::alloueBloc(long taille,char *blocType){
 	// initialiser le nom du bloc pour l'autre methode
-	return alloueBloc(taille, blocType, NULL);
+	return alloueBloc(taille, blocType, (char *) NULL,0);
 }
 
 int Memoire::alloueBloc(long taille,char *blocType, char *blocName){
-	//std::cout << "Memoire::alloueBloc : allocation d'un bloc de " << taille << "\n";
+	return alloueBloc(taille, blocType, blocName, 0);
+}
+
+int Memoire::alloueBloc(long taille,char *blocType, int userId){
+	return alloueBloc(taille, blocType, NULL, userId);
+}
+
+int Memoire::alloueBloc(long taille,char *blocType, char *blocName, int userId){
 	int id=0;
 	structBloc tmpBloc;
 	long offset=0;
+	char tmpName[50];
+
+	if (blocName == NULL){
+		blocName = tmpName;
+		sprintf(blocName,"bloc %d",id);
+	}
+	/*
+	std::cout << "Memoire::alloueBloc : allocation d'un bloc\n";
+	std::cout << "                      Taille   = " << taille << "\n";
+	std::cout << "                      Type     = " << blocType << "\n";
+	std::cout << "                      blocName = " << blocName << "\n";
+	std::cout << "                      UserId   = " << userId << "\n";
+	*/
+	openMemoryFile();
 	fseek(memoryFile, offset, 0);
 	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	while (tmp == tailleStructBloc){
@@ -162,17 +198,16 @@ int Memoire::alloueBloc(long taille,char *blocType, char *blocName){
 	strcpy(tmpBloc.fin,"[fin]");
 	tmpBloc.id=id;
 	tmpBloc.size=taille;
+	tmpBloc.owner=userId;
 	strcpy(tmpBloc.type,blocType);
 	strcpy(tmpBloc.status,BLOC_USED);
-	if (blocName == NULL){
-		sprintf(tmpBloc.name,"bloc %d",id);
-	}else{
-		strcpy(tmpBloc.name,blocName);
-	}
+	strcpy(tmpBloc.name,blocName);
 	tmpBloc.datas = (char *)malloc(taille);
 	fwrite(&tmpBloc,(size_t)tailleStructBloc,1,memoryFile);
 	//afficheBloc(tmpBloc);
 	fflush(memoryFile);
+	fclose(memoryFile);
+	//std::cout << "Memoire::alloueBloc : fin allocation d'un bloc\n";
 	return id;
 }
 
@@ -182,30 +217,44 @@ int Memoire::alloueBloc(long taille,char *blocType, char *blocName){
 //
 //--------------------------------
 structBloc Memoire::getBloc(int id){
-	structBloc tmpBloc;
-	long offset=tailleStructBloc*id;
-	fseek(memoryFile,offset,0);
-	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
-	if (tmp == tailleStructBloc){
-		return tmpBloc;
-	}
-	tmpBloc.id=-1;
-	tmpBloc.size=0;
-	return tmpBloc;
-}
-structBloc Memoire::getBloc(char *chaine){
+	//std::cout << "Memoire::getBloc => id " << id << "\n";
 	structBloc tmpBloc;
 	long offset=0;
+	openMemoryFile();
 	fseek(memoryFile,offset,0);
 	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	while (tmp == tailleStructBloc){
-		if (strcmp(tmpBloc.name,chaine) == 0){
+		//std::cout << "Memoire::getBloc => analyse du bloc " << tmpBloc.id << "\n";
+		if (tmpBloc.id == id){
+			fclose(memoryFile);
+			//std::cout << "Memoire::getBloc => bloc trouve " << id << "\n";
 			return tmpBloc;
 		}
 		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	}
 	tmpBloc.id=-1;
 	tmpBloc.size=0;
+	fclose(memoryFile);
+	//std::cout << "Memoire::getBloc => pas de bloc trouve avec cet id " << id << "\n";
+	return tmpBloc;
+}
+structBloc Memoire::getBloc(char *chaine){
+	//std::cout << "Memoire::getBloc => chaine " << chaine << "\n";
+	structBloc tmpBloc;
+	long offset=0;
+	openMemoryFile();
+	fseek(memoryFile,offset,0);
+	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	while (tmp == tailleStructBloc){
+		if (strcmp(tmpBloc.name,chaine) == 0){
+			fclose(memoryFile);
+			return tmpBloc;
+		}
+		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	}
+	tmpBloc.id=-1;
+	tmpBloc.size=0;
+	fclose(memoryFile);
 	return tmpBloc;
 }
 
@@ -216,7 +265,7 @@ structBloc Memoire::getBloc(char *chaine){
 //
 //--------------------------------
 void Memoire::afficheBloc(structBloc bloc){
-	std::cout << "\nAffichage du contenu d'un bloc\n";
+	std::cout << "Affichage du contenu d'un bloc\n";
 	if (bloc.id == -1){
 		std::cout << "ERROR bloc id " << bloc.id << " is invalid\n";
 		return;
@@ -224,6 +273,7 @@ void Memoire::afficheBloc(structBloc bloc){
 	std::cout << "type      : " << bloc.type << "\n";
 	std::cout << "id        : " << bloc.id << "\n";
 	std::cout << "nom       : " << bloc.name << "\n";
+	std::cout << "owner     : " << bloc.owner << "\n";
 	std::cout << "taille    : " << bloc.size << "\n";
 	std::cout << "status    : " << bloc.status << "\n";
 	std::cout << "ptr datas : " << &bloc.datas << "\n";
@@ -239,6 +289,7 @@ void Memoire::listeBlocs(void){
 	char ligne[50];
 	long offset=0;
 	structBloc tmpBloc;
+	openMemoryFile();
 	fseek(memoryFile,offset,0);
 	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	//std::cout << "listeBlocs : nombre de caracteres lus : " << tmp <<  " " << tailleStructBloc << "\n";
@@ -248,12 +299,12 @@ void Memoire::listeBlocs(void){
 		return;
 	}
 	//std::cout << " first data bloc : " << tmpBloc.datas << "\n";
-	std::cout << "+-----+------+--------+--------+----------------+---------------------------+\n";
-	std::cout << "|  id | type | taille | status | Ptr datas      |  nom du bloc              |\n";
-	std::cout << "+-----+------+--------+--------+----------------+---------------------------+\n";
+	std::cout << "+-----+------+--------+--------+--------+----------------+---------------------------+\n";
+	std::cout << "|  id | type | taille | status | UserId | Ptr datas      |  nom du bloc              |\n";
+	std::cout << "+-----+------+--------+--------+--------+----------------+---------------------------+\n";
 	while (tmp == tailleStructBloc){
 		//std::cout << "offset = " << offset << "; affichage du bloc n°" << tmpBloc.id << "\n";
-		sprintf(ligne,"| %3d |  %3s | %6ld | %5s  |",tmpBloc.id, tmpBloc.type, tmpBloc.size,tmpBloc.status);
+		sprintf(ligne,"| %3d |  %3s | %6ld | %5s  |   %3d  |",tmpBloc.id, tmpBloc.type, tmpBloc.size,tmpBloc.status,tmpBloc.owner);
 		std::cout << ligne;
 		sprintf(ligne, " %14p |",tmpBloc.datas);
 		std::cout << ligne;
@@ -266,7 +317,8 @@ void Memoire::listeBlocs(void){
 		fseek(memoryFile,offset,0);
 		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	}
-	std::cout << "+-----+------+--------+--------+----------------+---------------------------+\n";
+	std::cout << "+-----+------+--------+--------+--------+----------------+---------------------------+\n";
+	fclose(memoryFile);
 }
 
 
@@ -279,18 +331,21 @@ int Memoire::nbBlocs(void){
 	int cpt=0;
 	long offset=0;
 	structBloc tmpBloc;
+	openMemoryFile();
 	fseek(memoryFile,offset,0);
 	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	//std::cout << "listeBlocs : nombre de caracteres lus : " << tmp <<  " " << tailleStructBloc << "\n";
 	// affichage de l'entete
 	if (tmp != tailleStructBloc){
 		std::cout << "ERROR : impossible to read memory bloc list (" << tmp << ")\n";
+		fclose(memoryFile);
 		return 0;
 	}
 	while (tmp == tailleStructBloc){
 		cpt++;
 		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	}
+	fclose(memoryFile);
 	return cpt;
 }
 
@@ -306,12 +361,14 @@ void Memoire::libereBloc(int id){
 
 	//std::cout << "Memoire::libereBloc : " << id << "\n";
 
+	openMemoryFile();
 	fseek(memoryFile,offset,0);
 	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	//std::cout << "listeBlocs : nombre de caracteres lus : " << tmp <<  " " << tailleStructBloc << "\n";
 	// affichage de l'entete
 	if (tmp != tailleStructBloc){
 		std::cout << "ERROR : impossible to read memory bloc list (" << tmp << ")\n";
+		fclose(memoryFile);
 		return;
 	}
 	while (tmp == tailleStructBloc){
@@ -319,6 +376,7 @@ void Memoire::libereBloc(int id){
 			//std::cout << "Memoire::libere => on a trouve l'id du bloc " << id << "\n";
 			strcpy(tmpBloc.status,BLOC_FREE);
 			tmpBloc.size=-1;
+			tmpBloc.owner=-1;
 			free (tmpBloc.datas);
 			tmpBloc.datas=NULL;
 			strcpy(tmpBloc.name,"");
@@ -329,12 +387,14 @@ void Memoire::libereBloc(int id){
 			position -= tailleStructBloc;
 			fseek(memoryFile,position,0);
 			fwrite(&tmpBloc,(size_t)tailleStructBloc,1,memoryFile);
+			fclose(memoryFile);
 			return;
 		}
 		tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	}
 	// on sort de la boucle sans avoir trouve le bloc concerne
 	std::cout << "ERROR : bloc " << id << " inconnu\n";
+	fclose(memoryFile);
 }
 
 //--------------------------------
@@ -342,10 +402,18 @@ void Memoire::libereBloc(int id){
 //     kill
 //
 //--------------------------------
+
 void Memoire::kill(void){
-	char commande[25];
-	sprintf(commande,"rm %s",filename);
-	std::cout << "Memoire::kill : destruction du fichier memoire avec la commande : " << commande << "\n";
+	kill(filename);
+}
+void Memoire::kill(char *filename){
+	//printf("try to erase memory file on disk if exist : %s\n",filename);
+	char commande[250];
+	sprintf(commande,"if [ -f %s ]; then rm %s; fi;",filename, filename);
+
+	//std::cout << "Memoire::kill : destruction du fichier memoire avec la commande : " << commande << "\n";
+	//printf("Erase memory file on disk if exist\n");
+	INFO("Erase memory file on disk if exist");
 	system(commande);
 }
 
@@ -384,7 +452,7 @@ char *Memoire::blocRead(int id, long offset, long nb){
 		std::cout << "ERROR : impossible to get pointer on data structure\n";
 		return NULL;
 	}
-	//std::cout << "Memoire::blocRead : ptr(" << &ptr << ")\n";
+	std::cout << "Memoire::blocRead : ptr(" << &ptr << ")\n";
 	ptr += offset;
 	//std::cout << "Memoire::blocRead : lecture dans la memoire ; taille = " << nb << "\n";
 	memcpy(buffer,ptr, (size_t)nb);
@@ -408,4 +476,72 @@ char *Memoire::getPtrData(int id){
 	ptr = tmpBloc.datas;
 	//std::cout << "Memoire::getPtrData : " << ptr << "\n";
 	return ptr;
+}
+
+//--------------------------------
+//
+//     garbageCollector
+//
+//--------------------------------
+void Memoire::garbageCollector(void){
+	//std::cout << "Memoire::garbageCollector => debut du garbage collector\n";
+
+	if (monUser.getUserId() != 0){
+		std::cout << "ERROR : only root user can run garbage collector\n";
+		return;
+	}
+	long positionRead=0;
+	long positionWrite=0;
+	structBloc readBloc, writeBloc;
+	structBloc tmpBloc;
+
+	char commande[25];
+	// creation d'un fichier temporaire pour ecrire la nouvelle liste de blocs
+	char writeFileName[50];
+	sprintf(writeFileName,"%s.svg",filename);
+
+	FILE *writeFile = fopen(writeFileName,"wb+");
+    if (writeFile == NULL){
+    	std::cout << "ERROR : unable to open Memory File (NULL) : " << writeFileName  << "\n";
+    }
+
+	openMemoryFile();
+	fseek(memoryFile,positionRead,0);
+	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	// affichage de l'entete
+	if (tmp != tailleStructBloc){
+		std::cout << "ERROR : impossible to read memory bloc list (" << tmp << ")\n";
+		return;
+	}
+	//std::cout << "             lecture du bloc " << tmpBloc.id << "\n";
+	while (tmp == tailleStructBloc){
+		//std::cout << "      analyse du bloc : " << tmpBloc.id << "\n";
+		if (tmpBloc.owner == -1){
+			// ce bloc est a supprimer
+			//std::cout << "             bloc a supprimer\n";
+			// on incremente seulement le pointeur de lecture, pas celui d'ecriture
+			positionRead+=tailleStructBloc;
+			fseek(memoryFile,positionRead,0);
+		}else{
+			// on conserve ce bloc, on l'ecrit sur le fichier et on lit le bloc suivant
+			// on positionne le pointeur de fichier sur l'endroit ou ecrire le bloc
+			fseek(writeFile,positionWrite,0);
+			// on ecrit ce bloc dans le fichier
+			//std::cout << "             ecriture du bloc " << tmpBloc.id << "\n";
+			fwrite(&tmpBloc,(size_t)tailleStructBloc,1,writeFile);
+			// on incremente le pointeur d'ecriture de bloc 
+			positionWrite+=tailleStructBloc;
+			// on repositionne le pointeur de fichier sur le prochain bloc a lire
+			positionRead+=tailleStructBloc;
+			fseek(memoryFile,positionRead,0);
+		}
+		tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+		//std::cout << "             lecture du bloc " << tmpBloc.id << "\n";
+	}
+	fclose(writeFile);
+	fclose(memoryFile);
+
+	// on recopie la nouvelle structure de blocs dans le fichier d'origine
+	sprintf(commande,"mv %s %s",writeFileName, filename);
+	system(commande);
 }

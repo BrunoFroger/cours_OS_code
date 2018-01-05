@@ -18,6 +18,7 @@
 #include "../inc/memoire.hpp"
 #include "../inc/taches.hpp"
 #include "../inc/tools.hpp"
+#include "../inc/users.hpp"
 
 
 #define PARAM_SIZE	20
@@ -25,11 +26,12 @@
 
 extern Memoire maMemoire;
 extern Taches mesTaches;
+extern Users monUser;
 
-char prompt[BUFF_SIZE]="Cours OS > ";
+char prompt[BUFF_SIZE];
 char params[PARAM_NB][PARAM_SIZE];
 //char []lstCommandeInterne[]={"tsk", "kill", "mem", "dumpMem", "fillMem", "hist", "shell", "garbage", "?", "exit"};
-char lstCommandeInterne[50][10]={"mem", "affBloc", "allocMem", "dump", "blocRead", "blocWrite", "nbBlocs", "tsk","kill","help", "?", "exit"};
+char lstCommandeInterne[50][10]={"gc", "log", "whoami", "mem", "users", "affBloc", "allocMem", "dump", "blocRead", "blocWrite", "nbBlocs", "tsk","kill","help", "?", "exit"};
 
 
 //--------------------------------
@@ -41,25 +43,25 @@ Console::Console(){
 	char saisie[BUFF_SIZE];
 	//char car;
 	//std::cout << "Console::Console => constructeur \n";
+	INFO("Connexion du userId %s", monUser.getName());
+	//std::cout << "Connexion du userId " << userId << "\n";
+	sprintf(prompt, "Cours OS (user %s) > ",monUser.getName());
 	while (1){
-
-/*
-		if (kbhit()){
-			// un caractere a ete saisi
-			car = getchar();
-			std::cout << car;
-		}
-*/
-		
 		std::cout << prompt;
 		lireChaine(saisie,BUFF_SIZE);
+		//std::cout << "boucle principale de la console : chaine saisie : (" << saisie << ")\n";
 		switch(analyseCommande(saisie)){
 			case -1 : // exit
+				char tmp[50];
+				strcpy(tmp,monUser.getName());
+				monUser.kill();
+				INFO("Deconnexion du userId %s", tmp);
 				return;
 				break;
 			default : // normal commande execution
 				break;
 		}
+		//std::cout << "fin de la boucle principale de la console\n";
 	}
 }
 
@@ -70,13 +72,7 @@ Console::Console(){
 //
 //-----------------------------
 void Console::lireChaine(char *chaine, int size){
-	//std::cout << "debut de lire chaine\n";
-	/*
-	fgets(chaine, size, stdin);
-	chaine[strlen(chaine) - 1] = '\0';
-	*/
 
-	// test de la fonction kbhit
 	std::cout << std::flush;
 	strcpy(chaine,"");
 	char car, car1;
@@ -85,12 +81,11 @@ void Console::lireChaine(char *chaine, int size){
 		if (kbhit()){
 			car = getchar();
 			std::cout << std::flush;
-			printf("code de touche saisie %d(0x%02x) \n",car,car);
+			//printf("code de touche saisie %d(0x%02x) \n",car,car);
 			switch (car){
 				case 0x0a: 
 					// validation de la commande par return
-					std::cout << "validation de la commande " << chaine;
-					std::cout << "\n";
+					//std::cout << "validation de la commande " << chaine << "\n";
 					return;
 					break;;
 				case 0x27:
@@ -123,13 +118,8 @@ void Console::lireChaine(char *chaine, int size){
 					break;
 			}
 		}
-		int milliseconds=10;
-	    struct timespec ts;
-	    ts.tv_sec = milliseconds / 1000;
-	    ts.tv_nsec = (milliseconds % 1000) * 1000000;
-	    nanosleep(&ts, NULL);
-		//usleep(1);
-		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+		usleep(10);
 	}
 	std::cout << std::flush;
 }
@@ -140,6 +130,7 @@ void Console::lireChaine(char *chaine, int size){
 //
 //-----------------------------
 int Console::isCommandeInterne(char *commande){
+	if (strlen(commande) == 0) return 0;
 	char tmpCommande[BUFF_SIZE];
 	strcpy (tmpCommande,commande);
 	//printf("[isCommandeInterne] : <%s>\n",commande);
@@ -190,6 +181,8 @@ void Console::help(void){
 	printf("| Liste des commandes internes disponibles                               |\n");	
 	printf("+----------------------+-------------------------------------------------+\n");
 	printf("| tsk                  | liste des taches                                |\n");
+	printf("| gc                   | garbage collector                               |\n");
+	printf("| whoami               | affiche le userId                               |\n");
 	printf("| kill <id|nom>        | tue la tache <id|nom>                           |\n");
 	printf("| mem                  | description de la memoire                       |\n");
 	printf("| affBloc id           | description d'un bloc memoire                   |\n");
@@ -204,6 +197,7 @@ void Console::help(void){
 	//printf("| ls                   | liste des taches externes                       |\n");
 	//printf("| shell                | lance un shell dans une nouvelle fenetre        |\n");
 	//printf("| garbage              | nettoyage de la memoire                         |\n");
+	printf("| log                  | envoi un message dans le fichier de log         |\n");
 	printf("| help                 | cet ecran d'aide                                |\n");
 	printf("| ?                    | cet ecran d'aide                                |\n");
 	printf("| exit                 | quitte la console                               |\n");
@@ -224,7 +218,7 @@ int Console::analyseCommande(char *chaine){
 	char param2[100];
 	
 	if (isCommandeInterne(chaine)){
-		//std::cout << "analyseCommande : chaine = <" << chaine << ">\n";
+		//std::cout << "analyseCommande : chaine = <" << chaine << "> (" << strlen(chaine) << ")\n";
 		if (strcmp(chaine,"exit") == 0){
 			return -1;
 		} else if (strncmp(chaine,"allocMem", 8) == 0){
@@ -259,11 +253,21 @@ int Console::analyseCommande(char *chaine){
 			help();
 		} else if (strcmp(chaine, "mem") == 0){
 			maMemoire.listeBlocs();
+		} else if (strcmp(chaine, "gc") == 0){
+			maMemoire.garbageCollector();
 		} else if (strncmp(chaine, "affBloc",7) == 0){
 			strcpy(param, getParam(chaine, 1));
 			maMemoire.afficheBloc(maMemoire.getBloc(atoi(param)));
 		} else if (strcmp(chaine, "tsk") == 0){
 			mesTaches.listeTaches();
+		} else if (strcmp(chaine, "whoami") == 0){
+			std::cout << "userId = " << monUser.getUserId() << "; name = " << monUser.getName() << "\n";
+		} else if (strcmp(chaine, "users") == 0){
+			monUser.listeUsers();
+			std::cout << "Console::analyseCommande => fin d'affichage de la liste des users \n";
+		} else if (strncmp(chaine, "log",3) == 0){
+			strcpy(param, getParam(chaine, 1));
+			INFO(param);
 		} else if (strncmp(chaine, "kill",4) == 0){
 			int result;
 			strcpy(param, getParam(chaine, 1));
@@ -276,13 +280,20 @@ int Console::analyseCommande(char *chaine){
 				std::cout << "ERROR : Impossible to kill " << param << "\n";
 			}
 		}
+		//std::cout << "Console::analyseCommande => fin d'execution d'une commande interne \n";
 	}else{
 		// ce n'est pas une commmande interne
+		if (strlen(chaine) == 0){
+			// pas de commande saisie
+			return 0;
+		}
 		int tskId = mesTaches.lance(chaine);
 		if (tskId == -1){
 			std::cout << "ERROR : Impossible to launch " << chaine << "\n";
 		}
+		//std::cout << "Console::analyseCommande => fin d'execution d'une commande externe \n";
 	}
+	//std::cout << "Console::analyseCommande => fin d'analyse de commande\n";
 	return 0;
 }
 

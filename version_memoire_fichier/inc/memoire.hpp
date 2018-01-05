@@ -23,6 +23,7 @@ typedef struct {
 	char debut[10];
 	char type[5];
 	char name[50];
+	int owner;
 	int id;
 	long size;
 	char status[5];
@@ -39,6 +40,7 @@ private:
 	int tailleStructBloc;
 	void dump(long offset, long nb);
 	char *getPtrData(int id);
+	void openMemoryFile(void);
 
 public:
 	Memoire();
@@ -48,6 +50,8 @@ public:
 	void display(long offset, long nb);
 	int alloueBloc(long taille, char *type);
 	int alloueBloc(long taille, char *type, char *blocName);
+	int alloueBloc(long taille, char *type, char *blocName, int userId);
+	int alloueBloc(long taille, char *type, int userId);
 	void listeBlocs(void);
 	structBloc getBloc(int id);
 	structBloc getBloc(char *chaine);
@@ -55,8 +59,10 @@ public:
 	int nbBlocs(void);
 	void libereBloc(int id);
 	void kill(void);
+	void kill(char *filename);
 	long blocWrite(int id, long offset, char *datas);
 	char *blocRead(int id, long offset, long nb);
+	void garbageCollector(void);
 };
 
 

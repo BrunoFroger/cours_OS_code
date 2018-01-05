@@ -1,0 +1,9 @@
+Fonctionalites a creer :
+- gestion des caracteres speciaux saisis dans la console
+- interdire le lancement de shellOs si l'os n'a pas ete lancé
+- ecrire le sheduler
+- ecrire l'executeur de commande
+- utiliser popen pour executer des commandes shell et recuperer le resultat de la commande dans un string
+
+Bugs a corriger :
+- fonction kill tache, si une tache avec le meme nom pour un autre user existe avant celle de ce user => erreur renvoyée

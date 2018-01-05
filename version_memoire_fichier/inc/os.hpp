@@ -13,10 +13,11 @@
 #define KO 	-1
 
 #define BUFF_SIZE 		250
-#define MEMORY_FILENAME	"memoire0.dta"
+#define MEMORY_FILENAME	"memoireBlocs.dta"
 
 #define BLOC_TYPE_MEM	"MEM"
 #define BLOC_TYPE_TSK	"TSK"
+#define BLOC_TYPE_USR	"USR"
 #define BLOC_TYPE_NA	"N/A"
 
 

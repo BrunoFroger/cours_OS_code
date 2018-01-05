@@ -21,10 +21,12 @@
 class Taches{
 private:
 	char filename[50];
+	int owner;
 	char type[5];
 	char buffer[MAX_BUFFER];
 	FILE * memoryFile;
 	int tailleStructBloc;
+	void openMemoryFile(void);
 
 public:
 	Taches(void);

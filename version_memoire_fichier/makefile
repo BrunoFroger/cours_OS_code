@@ -10,7 +10,7 @@
 CC=c++
 CCFLAGS=-Wall -c -o $@
 
-OBJ=obj/memoire.o obj/console.o obj/taches.o obj/tools.o
+OBJ=obj/memoire.o obj/console.o obj/taches.o obj/tools.o obj/users.o
 OBJ_OS=$(OBJ) obj/os.o
 OBJ_TST=$(OBJ) obj/test.o
 OBJ_SH=$(OBJ) obj/shellOs.o
@@ -62,6 +62,10 @@ obj/taches.o: src/taches.cpp\
 obj/tools.o: src/tools.cpp\
 	inc/tools.hpp
 	$(CC) $(CCFLAGS) src/tools.cpp 
+
+obj/users.o: src/users.cpp\
+	inc/users.hpp
+	$(CC) $(CCFLAGS) src/users.cpp 
 
 #
 #nettoyage

@@ -20,10 +20,12 @@ private:
 	int analyseCommande(char *chaine);
 	void help(void);
 	int isCommandeInterne(char *commande);
+	void historiseCommande(char *commande);
 
 public:
 	Console(void);				// constructeur
 	static char * getParam(char *chaine, int idx);
+	void AffHistoryCommandes(void);
 };
 
 #endif

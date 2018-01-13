@@ -17,7 +17,11 @@
 #include <cstring>
 #include "../inc/tools.hpp"
 
-
+//--------------------------------
+//
+//     log_print
+//
+//--------------------------------
 void log_print(int level, const char *format, ...){
 	va_list args;
 	va_start(args, format);
@@ -92,7 +96,11 @@ void log_print(int level, const char *format, ...){
 	va_end(args);
 }
 
-
+//--------------------------------
+//
+//     kbhit
+//
+//--------------------------------
 int kbhit(void){
   struct termios oldt, newt;
   int ch;
@@ -119,7 +127,11 @@ int kbhit(void){
   return 0;
 }
 
-
+//--------------------------------
+//
+//     usleep
+//
+//--------------------------------
 int usleep(int milliseconds){
     struct timespec ts;
     ts.tv_sec = milliseconds / 1000;

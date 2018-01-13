@@ -16,7 +16,21 @@
 #define taches_hpp
 
 #define NB_PARAMS	10
+#define MAX_TACHES	100
 
+#define TASK_ACTIVE	1
+#define TASK_SLEEP 	2
+#define	TASK_KILLED	3
+#define TASK_NA		-1
+
+typedef struct {
+	char name[50];
+	int owner;
+	int father;
+	int taskId;
+	int status;
+	int priority;
+}structTache;
 
 class Taches{
 private:
@@ -27,6 +41,7 @@ private:
 	FILE * memoryFile;
 	int tailleStructBloc;
 	void openMemoryFile(void);
+	structTache tblTaches[MAX_TACHES];
 
 public:
 	Taches(void);
@@ -35,6 +50,9 @@ public:
 	void listeTaches(void);
 	int kill(char *chaine);
 	int kill(int id);
+	structTache getNextActiveTask(int priorityLevel);
+	void pushActiveTask(structTache tache);
+	void creeBlocTache(char *chaine, long taille, char *texte);
 
 };
 

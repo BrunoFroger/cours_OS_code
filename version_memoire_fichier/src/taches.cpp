@@ -67,10 +67,24 @@ void Taches::openMemoryFile(){
 
 //--------------------------------
 //
+//     creeBlocTache
+//
+//--------------------------------
+void Taches::creeBlocTache(char *chaine, long taille, char *texte){
+	char type[10]=BLOC_TYPE_TSK;
+	int id = maMemoire.alloueBloc(taille, type, texte, monUser.getUserId());
+	//std::cout << "Taches::lance => memoire allouee pour ce nouveau bloc id = " << id << " \n";
+	maMemoire.blocWrite(id, 0, buffer);
+	//std::cout << "Taches::lance => donnees ecrites dans le fichier\n";
+	INFO("User %s create task %s", monUser.getName(), chaine);
+}
+
+//--------------------------------
+//
 //     lance
 //
 //--------------------------------
-int Taches::lance(char * chaine){
+int Taches::lance(char *chaine){
 	//std::cout << "Taches::lance => lancement de la tache : " << chaine << "\n";
 	long taille;
 	// on cherche le fichier sur le disque de ce programme externe
@@ -105,12 +119,7 @@ int Taches::lance(char * chaine){
 	}
 	//std::cout << "Taches::lance => taille du fichier = " << taille << " \n";
 
-	char type[10]=BLOC_TYPE_TSK;
-	int id = maMemoire.alloueBloc(taille, type, params[0], monUser.getUserId());
-	//std::cout << "Taches::lance => memoire allouee pour ce nouveau bloc id = " << id << " \n";
-	maMemoire.blocWrite(id, 0, buffer);
-	//std::cout << "Taches::lance => donnees ecrites dans le fichier\n";
-	INFO("User %s create task %s", monUser.getName(), chaine);
+	creeBlocTache(chaine, taille, params[0]);
 	return 0;
 }
 
@@ -187,3 +196,26 @@ void Taches::listeTaches(void){
 	fclose(memoryFile);
 }
 
+
+//--------------------------------
+//
+//     getNextTask
+//
+//--------------------------------
+structTache Taches::getNextActiveTask(int priorityLevel){
+	structTache tmp;
+	
+	// on cherhce une tache active avec un niveau de priorite 
+	// le plus haut et au moins
+	printf("Taches::getNextActiveTask => a ecrire\n");
+	return tmp;
+}
+
+//--------------------------------
+//
+//     pushActiveTask
+//
+//--------------------------------
+void Taches::pushActiveTask(structTache tache){
+	printf("Taches::pushActiveTask => a ecrire\n");
+}

@@ -24,15 +24,15 @@
 #define PARAM_SIZE	20
 #define PARAM_NB	5
 
+char prompt[BUFF_SIZE];
+char params[PARAM_NB][PARAM_SIZE];
+char lstCommandeInterne[50][10]={"hist", "gc", "log", "whoami", "mem", "users", "affBloc", "allocMem", "dump", "blocRead", "blocWrite", "nbBlocs", "tsk","kill","help", "?", "exit"};
+char historique[CMD_HISTORY_SIZE][BUFF_SIZE];
+int ptrHistorique=0;
+
 extern Memoire maMemoire;
 extern Taches mesTaches;
 extern Users monUser;
-
-char prompt[BUFF_SIZE];
-char params[PARAM_NB][PARAM_SIZE];
-//char []lstCommandeInterne[]={"tsk", "kill", "mem", "dumpMem", "fillMem", "hist", "shell", "garbage", "?", "exit"};
-char lstCommandeInterne[50][10]={"gc", "log", "whoami", "mem", "users", "affBloc", "allocMem", "dump", "blocRead", "blocWrite", "nbBlocs", "tsk","kill","help", "?", "exit"};
-
 
 //--------------------------------
 //
@@ -41,30 +41,65 @@ char lstCommandeInterne[50][10]={"gc", "log", "whoami", "mem", "users", "affBloc
 //--------------------------------
 Console::Console(){
 	char saisie[BUFF_SIZE];
-	//char car;
 	//std::cout << "Console::Console => constructeur \n";
-	INFO("Connexion du userId %s", monUser.getName());
+	char tmp[100];
+	char userName[100];
+	sprintf(userName, "%s", monUser.getName());
+	sprintf(tmp, "%s", "console");
+	
+	INFO("Connexion du user %s", userName);
+	mesTaches.creeBlocTache(tmp, 100, tmp);
+
 	//std::cout << "Connexion du userId " << userId << "\n";
-	sprintf(prompt, "Cours OS (user %s) > ",monUser.getName());
+	sprintf(prompt, "Cours OS (user %s) > ",userName);
+	sprintf(saisie,"");
 	while (1){
-		std::cout << prompt;
+		printf("\r%s%s",prompt,saisie) ;
 		lireChaine(saisie,BUFF_SIZE);
 		//std::cout << "boucle principale de la console : chaine saisie : (" << saisie << ")\n";
 		switch(analyseCommande(saisie)){
 			case -1 : // exit
-				char tmp[50];
-				strcpy(tmp,monUser.getName());
 				monUser.kill();
-				INFO("Deconnexion du userId %s", tmp);
+				INFO("Deconnexion du user %s", userName);
 				return;
 				break;
 			default : // normal commande execution
+				sprintf(saisie,"");
 				break;
 		}
 		//std::cout << "fin de la boucle principale de la console\n";
 	}
 }
 
+//-----------------------------
+//
+//   AffHistoryCommandes
+//
+//-----------------------------
+void Console::AffHistoryCommandes(void){
+	int index=ptrHistorique+1;
+	int cpt=0;;
+	do{
+		printf("%3d : %s\n",cpt++, historique[index++]);
+		if (index > CMD_HISTORY_SIZE){
+			index = 0;
+		}
+	}while (index != ptrHistorique);
+}
+
+
+//-----------------------------
+//
+//   historiseCommande
+//
+//-----------------------------
+void Console::historiseCommande(char *chaine){
+	ptrHistorique++;
+	strcpy(historique[ptrHistorique],chaine);
+	if (ptrHistorique >= CMD_HISTORY_SIZE) {
+		ptrHistorique=0;
+	}
+}
 
 //-----------------------------
 //
@@ -83,14 +118,16 @@ void Console::lireChaine(char *chaine, int size){
 			std::cout << std::flush;
 			//printf("code de touche saisie %d(0x%02x) \n",car,car);
 			switch (car){
-				case 0x0a: 
+				case 0x0a: // return
 					// validation de la commande par return
 					//std::cout << "validation de la commande " << chaine << "\n";
+					// on stocke la commande dans l'historique
+					historiseCommande(chaine);
 					return;
 					break;;
-				case 0x27:
+				case 0x1b:	// ESC
 					// saisie d'un caractere special (esc + ...)
-					printf("touche speciale saisie (esc)\n");
+					//printf("touche speciale saisie (esc)\n");
 					car1 = getchar();
 					if (car1 == 0x5b){
 						car1 = getchar();
@@ -98,16 +135,23 @@ void Console::lireChaine(char *chaine, int size){
 						switch(car1){
 							case 65: 
 								// fleche vers le haut
-								printf("touche speciale (esc) fleche haut \n");
+								printf("touche fleche haut \n");
 								break;
-							case 64: 
+							case 66: 
 								// fleche vers le bas
-								printf("touche speciale (esc) fleche bas \n");
+								printf("touche fleche bas \n");
+								break;
+							case 67: 
+								// fleche vers la droite
+								printf("touche fleche droite \n");
+								break;
+							case 68: 
+								// fleche vers la gauche
+								printf("touche fleche gauche \n");
 								break;
 							default:
 								printf("code de touche inconnu %d(0x%02x) \n",car1,car1);
 						}
-
 					}
 					break;;
 				default:
@@ -180,6 +224,7 @@ void Console::help(void){
 	printf("+------------------------------------------------------------------------+\n");
 	printf("| Liste des commandes internes disponibles                               |\n");	
 	printf("+----------------------+-------------------------------------------------+\n");
+	printf("| hist                 | historique des commandes                        |\n");
 	printf("| tsk                  | liste des taches                                |\n");
 	printf("| gc                   | garbage collector                               |\n");
 	printf("| whoami               | affiche le userId                               |\n");
@@ -191,12 +236,6 @@ void Console::help(void){
 	printf("| blocRead id deb n    | lit n elements du programme id depuis deb       |\n");
 	printf("| blocWrite id deb n   | ecrit n elements du programme id depuis deb     |\n");
 	printf("| nbBlocs              | nombre de blocs memoire definis                 |\n");
-	//printf("| fillMem deb n car    | remplis memoire avec n car depuis deb           |\n");
-	//printf("| storeMem deb text    | remplis memoire avec text depuis deb            |\n");
-	//printf("| hist                 | historique des commandes                        |\n");
-	//printf("| ls                   | liste des taches externes                       |\n");
-	//printf("| shell                | lance un shell dans une nouvelle fenetre        |\n");
-	//printf("| garbage              | nettoyage de la memoire                         |\n");
 	printf("| log                  | envoi un message dans le fichier de log         |\n");
 	printf("| help                 | cet ecran d'aide                                |\n");
 	printf("| ?                    | cet ecran d'aide                                |\n");
@@ -249,6 +288,8 @@ int Console::analyseCommande(char *chaine){
 			std::cout << "nb blocs defined : " << maMemoire.nbBlocs() << "\n";
 		} else if (strcmp(chaine,"help") == 0){
 			help();
+		} else if (strcmp(chaine,"hist") == 0){
+			AffHistoryCommandes();
 		} else if (strcmp(chaine,"?") == 0){
 			help();
 		} else if (strcmp(chaine, "mem") == 0){
@@ -264,6 +305,7 @@ int Console::analyseCommande(char *chaine){
 			std::cout << "userId = " << monUser.getUserId() << "; name = " << monUser.getName() << "\n";
 		} else if (strcmp(chaine, "users") == 0){
 			monUser.listeUsers();
+			printf("fin de listeUsers\n");
 			std::cout << "Console::analyseCommande => fin d'affichage de la liste des users \n";
 		} else if (strncmp(chaine, "log",3) == 0){
 			strcpy(param, getParam(chaine, 1));

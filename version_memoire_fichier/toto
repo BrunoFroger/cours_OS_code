@@ -5,6 +5,13 @@
 main(){
 	
 	// appel d'une fonction
-	resultat = call maFonction(10,"texte");
-	affiche resultat;
+	resultat = call(maFonction(10,"texte"));
+	affiche(resultat);
+}
+
+fonction maFonction(nb, chaine){
+	index = 0;
+	boucle(index;nb;index++){
+		affiche (texte + index);
+	}
 }

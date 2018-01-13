@@ -208,6 +208,8 @@ int Memoire::alloueBloc(long taille,char *blocType, char *blocName, int userId){
 	fflush(memoryFile);
 	fclose(memoryFile);
 	//std::cout << "Memoire::alloueBloc : fin allocation d'un bloc\n";
+	
+	INFO("User %s create a bloc %s with size %d", monUser.getName(), blocName, taille);
 	return id;
 }
 
@@ -247,8 +249,10 @@ structBloc Memoire::getBloc(char *chaine){
 	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	while (tmp == tailleStructBloc){
 		if (strcmp(tmpBloc.name,chaine) == 0){
-			fclose(memoryFile);
-			return tmpBloc;
+			if (tmpBloc.owner == monUser.getUserId()){
+				fclose(memoryFile);
+				return tmpBloc;
+			}
 		}
 		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	}
@@ -492,7 +496,6 @@ void Memoire::garbageCollector(void){
 	}
 	long positionRead=0;
 	long positionWrite=0;
-	structBloc readBloc, writeBloc;
 	structBloc tmpBloc;
 
 	char commande[25];
@@ -544,4 +547,6 @@ void Memoire::garbageCollector(void){
 	// on recopie la nouvelle structure de blocs dans le fichier d'origine
 	sprintf(commande,"mv %s %s",writeFileName, filename);
 	system(commande);
+	
+	INFO("Garbage Collector done");
 }

@@ -20,5 +20,6 @@
 #define BLOC_TYPE_USR	"USR"
 #define BLOC_TYPE_NA	"N/A"
 
+#define CMD_HISTORY_SIZE	20
 
 #endif

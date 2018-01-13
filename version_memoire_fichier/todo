@@ -1,9 +1,23 @@
 Fonctionalites a creer :
-- gestion des caracteres speciaux saisis dans la console
-- interdire le lancement de shellOs si l'os n'a pas ete lancé
-- ecrire le sheduler
+- gestion des caracteres speciaux saisis dans la console (en cours)
+	- gestion de l'historique avec les fleches haut et bas
+	- gestion de la ligne de saisie avec les fleches droites et gauche
+- ecrire le sheduler (en cours)
 - ecrire l'executeur de commande
 - utiliser popen pour executer des commandes shell et recuperer le resultat de la commande dans un string
 
 Bugs a corriger :
-- fonction kill tache, si une tache avec le meme nom pour un autre user existe avant celle de ce user => erreur renvoyée
+- dans l'affichage de la liste des users, plantage en fin de boucle ; erreur trap 6 (debordement memoire)
+	- message en fin de boucle de la methode Users::listeUsers OK
+	- par contre message dans Console::analyseCommande, on ne voit pas le retour de listeUsers
+- supprimer l'echo de caractere dans la fonction kbhit()
+
+
+Pour la fonction scheduller :
+- dans os :
+	- mettre une console (user root) dans la liste des taches actives
+	- lancer le scheduler en lieu et place de la console
+- dans shellOs :
+	- mettre une console avec le nom du user saisi ou passé en parametre dans la liste des taches
+- creer des devices d'affichage pour les differentes fenetres de lancements des consoles
+- dans la console, fonction lireChaine, supprime la boucle while (1) afin de rendre la main a l'os pour que le scheduller s'execute.

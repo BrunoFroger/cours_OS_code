@@ -19,7 +19,6 @@
 
 extern Memoire maMemoire;
 extern Taches mesTaches;
-//int userId;
 
 //--------------------------------
 //
@@ -155,7 +154,7 @@ void Users::listeUsers(void){
 	std::cout << "|  id | nom                                                 |\n";
 	std::cout << "+-----+-----------------------------------------------------+\n";
 	while (tmp == tailleStructBloc){
-		std::cout << "analyse du bloc " << tmpBloc.id << "\n";
+		//std::cout << "analyse du bloc " << tmpBloc.id << "\n";
 		if (strcmp(tmpBloc.type, BLOC_TYPE_USR) == 0){
 			//std::cout << "Taches::listeBlocs : offset = " << offset << "; affichage du bloc n°" << tmpBloc.id << "\n";
 			sprintf(ligne,"| %3d | %-50s  |",tmpBloc.owner, tmpBloc.name);
@@ -168,9 +167,9 @@ void Users::listeUsers(void){
 		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
 	}
 	std::cout << "+-----+-----------------------------------------------------+\n";
-    std::cout << "Users::listeUsers : fin d'affichage\n";
     fclose(memoryFile);
-    return;
+    std::cout << "Users::listeUsers : fin d'affichage\n";
+    printf("fin de boucle a debugger trap 6, ecriture hors de la memoire allouee\n");
 }
 
 //--------------------------------

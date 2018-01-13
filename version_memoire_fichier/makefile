@@ -1,6 +1,6 @@
 #
 #  makefile
-#  OS et testsOS
+#  OS, shellOs et testsOS
 #
 #  Created by Bruno FROGER on 20/11/2017.
 #  Copyright © 2017 Bruno FROGER. All rights reserved.
@@ -10,7 +10,7 @@
 CC=c++
 CCFLAGS=-Wall -c -o $@
 
-OBJ=obj/memoire.o obj/console.o obj/taches.o obj/tools.o obj/users.o
+OBJ=obj/memoire.o obj/console.o obj/taches.o obj/tools.o obj/users.o obj/scheduler.o
 OBJ_OS=$(OBJ) obj/os.o
 OBJ_TST=$(OBJ) obj/test.o
 OBJ_SH=$(OBJ) obj/shellOs.o
@@ -66,6 +66,10 @@ obj/tools.o: src/tools.cpp\
 obj/users.o: src/users.cpp\
 	inc/users.hpp
 	$(CC) $(CCFLAGS) src/users.cpp 
+
+obj/scheduler.o: src/scheduler.cpp\
+	inc/scheduler.hpp
+	$(CC) $(CCFLAGS) src/scheduler.cpp 
 
 #
 #nettoyage

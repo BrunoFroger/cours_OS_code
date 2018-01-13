@@ -1,5 +1,5 @@
 //
-//  test.cpp
+//  shellOS.cpp
 //  OS
 //
 //  Created by Bruno FROGER on 20/11/2017.
@@ -30,17 +30,23 @@ int main(int argc, const char * argv[]) {
     char tmpName[50];
 
     strcpy(filename, MEMORY_FILENAME);
+    FILE *testFic = fopen(filename,"r");
+    if (testFic == NULL){
+		std::cout << "ERROR : memory file not initialized ; run os process first\n";
+		exit (-1);
+	}
     maMemoire.init(filename);
+	//std::cout << "maMemoire initialized \n";
 	mesTaches.init(filename);
-	if (strlen(argv[1]) > 0){
+	//std::cout << "mesTaches initialized \n";
+	if (argv[1] != NULL){
 		strcpy(userName, argv[1]);
 	}else{
 	    printf("Saisissez un nom d'utilisateur : ");
 	    gets(userName);
 	}
-    // trouver un moyen de recuperer le dernier userId utilisé
+	
     int id = monUser.getNewUserId();
-    //sprintf(tmpName,"user %s",);
     int userBlocId = maMemoire.alloueBloc(100, BLOC_TYPE_USR, userName, id);
     monUser.init(filename, id, userName);
     monUser.setName(userName);

@@ -7,16 +7,19 @@
 //
 
 #include <iostream>
+#include <cstdio>
 
 #include "../inc/Memoire.hpp"
 #include "../inc/os.hpp"
 #include "../inc/taches.hpp"
+#include "../inc/users.hpp"
 
 
 using namespace std;
 
 Memoire maMemoire;
 Taches mesTaches;
+Users monUser;
 int userId;
 
 int main(int argc, const char * argv[]) {
@@ -29,7 +32,7 @@ int main(int argc, const char * argv[]) {
     strcpy(filename, MEMORY_FILENAME);
     cout << "test : creation memoire 0\n";
     maMemoire.init(filename);
-	userId=maMemoire.newUserId();
+	userId=monUser.getNewUserId();
 	mesTaches.init(filename);
 
     if ( 1 == 0 ) {

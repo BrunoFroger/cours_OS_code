@@ -39,7 +39,6 @@ private:
 	FILE * memoryFile;
 	int tailleStructBloc;
 	void dump(long offset, long nb);
-	char *getPtrData(int id);
 	void openMemoryFile(void);
 
 public:
@@ -63,6 +62,7 @@ public:
 	long blocWrite(int id, long offset, char *datas);
 	char *blocRead(int id, long offset, long nb);
 	void garbageCollector(void);
+	char *getPtrData(int id);
 };
 
 

@@ -27,7 +27,7 @@ int main(int argc, const char * argv[]) {
     
     char filename[50];
     char userName[50];
-    char tmpName[50];
+    //char tmpName[50];
 
     strcpy(filename, MEMORY_FILENAME);
     FILE *testFic = fopen(filename,"r");
@@ -47,7 +47,7 @@ int main(int argc, const char * argv[]) {
 	}
 	
     int id = monUser.getNewUserId();
-    int userBlocId = maMemoire.alloueBloc(100, BLOC_TYPE_USR, userName, id);
+    int userBlocId = maMemoire.alloueBloc(100, (char *)BLOC_TYPE_USR, userName, id);
     monUser.init(filename, id, userName);
     monUser.setName(userName);
 

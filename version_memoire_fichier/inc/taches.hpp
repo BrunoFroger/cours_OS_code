@@ -36,12 +36,12 @@ class Taches{
 private:
 	char filename[50];
 	int owner;
-	char type[5];
+	//char type[5];
 	char buffer[MAX_BUFFER];
 	FILE * memoryFile;
 	int tailleStructBloc;
 	void openMemoryFile(void);
-	structTache tblTaches[MAX_TACHES];
+	//structTache tblTaches[MAX_TACHES];
 
 public:
 	Taches(void);
@@ -53,6 +53,7 @@ public:
 	structTache getNextActiveTask(int priorityLevel);
 	void pushActiveTask(structTache tache);
 	void creeBlocTache(char *chaine, long taille, char *texte);
+	int nbTachesActives(void);
 
 };
 

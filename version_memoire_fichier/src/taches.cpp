@@ -44,7 +44,7 @@ void Taches::init(char *nomFichier){
 
 //--------------------------------
 //
-//     init
+//     openMemoryFile
 //
 //--------------------------------
 void Taches::openMemoryFile(){
@@ -194,6 +194,38 @@ void Taches::listeTaches(void){
 	}
 	std::cout << "+-----+--------+--------+--------+----------------+---------------------------+\n";
 	fclose(memoryFile);
+}
+
+
+//--------------------------------
+//
+//     nbTachesActives
+//
+//--------------------------------
+int Taches::nbTachesActives(void){
+	long offset=0;
+	structBloc tmpBloc;
+	int compteur=0;
+    openMemoryFile();
+	fseek(memoryFile,offset,0);
+	long tmp = fread(&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	if (tmp != tailleStructBloc){
+		std::cout << "ERROR : impossible to read memory bloc list (" << tmp << ")\n";
+		return -1;
+	}
+	while (tmp == tailleStructBloc){
+		if (strcmp(tmpBloc.type, BLOC_TYPE_TSK) == 0){
+			structTache *tmpTache = (structTache *)maMemoire.getPtrData(tmpBloc.id);
+			if (tmpTache->status == TASK_ACTIVE){
+				compteur++;
+			}
+		}
+		offset+=tailleStructBloc;
+		fseek(memoryFile,offset,0);
+		tmp = fread (&tmpBloc, 1, (size_t) tailleStructBloc, memoryFile);
+	}
+	fclose(memoryFile);
+	return compteur;
 }
 
 

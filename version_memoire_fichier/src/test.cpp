@@ -48,21 +48,21 @@ int main(int argc, const char * argv[]) {
     if ( 1 == 1 ){
 	    taille=100;
 	    cout << "test : allocation d'un bloc de taille : " << taille << "\n";
-	    id = maMemoire.alloueBloc(taille, BLOC_TYPE_MEM);
+	    id = maMemoire.alloueBloc(taille, (char *)BLOC_TYPE_MEM);
 	    cout << "test : bloc avec id = " << id << " alloue\n";
 
     }
     if ( 1 == 1 ){
 	    taille=50;
 	    cout << "test : allocation d'un bloc de taille : " << taille << "\n";
-	    id = maMemoire.alloueBloc(taille, BLOC_TYPE_MEM);
+	    id = maMemoire.alloueBloc(taille, (char *)BLOC_TYPE_MEM);
 	    cout << "test : bloc avec id = " << id << " alloue\n";
 
     }
     if ( 1 == 1 ){
 	    taille=200;
 	    cout << "test : allocation d'un bloc de taille : " << taille << "\n";
-	    id = maMemoire.alloueBloc(taille, BLOC_TYPE_MEM);
+	    id = maMemoire.alloueBloc(taille, (char *)BLOC_TYPE_MEM);
 	    cout << "test : bloc avec id = " << id << " alloue\n";
 
     }

@@ -32,7 +32,7 @@ void log_print(int level, const char *format, ...){
 	time(&rawtime);
 	char entete[200]="";
 	char result[500]="";
-	int i=0,j=0;
+	int i=0;
 	int idx=0;
 	char v[30]="";
 	int n;

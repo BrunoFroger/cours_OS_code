@@ -36,11 +36,11 @@ int main(int argc, const char * argv[]) {
     //INFO("creation memoire 0");
 	maMemoire.init(filename);
 	mesTaches.init(filename);
-    maMemoire.alloueBloc(100000, BLOC_TYPE_MEM);
+    maMemoire.alloueBloc(100000, (char *)BLOC_TYPE_MEM);
     char name[20];
     strcpy(name,"root");
     //printf("nom du bloc = %s\n", name);
-    maMemoire.alloueBloc(100, BLOC_TYPE_USR, name, 0);
+    maMemoire.alloueBloc(100, (char *)BLOC_TYPE_USR, name, 0);
     monUser.init(filename,0, name);
 
     int cpt;

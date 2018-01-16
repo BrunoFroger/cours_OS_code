@@ -211,7 +211,7 @@ char * Console::getParam(char *chaine, int idx){
 		p = strtok(NULL, " ");
 		i++;
 	}
-	return "";
+	return (char *)"";
 }
 
 
@@ -267,7 +267,7 @@ int Console::analyseCommande(char *chaine){
 				std::cout << "ERROR : manque parametre\n";
 				return 0;
 			}
-	 		maMemoire.alloueBloc(atol(param), BLOC_TYPE_MEM);
+	 		maMemoire.alloueBloc(atol(param), (char *)BLOC_TYPE_MEM);
 		} else if (strncmp(chaine,"dump",4) == 0){
 			strcpy(param, getParam(chaine, 1));
 			strcpy(param1, getParam(chaine, 2));
